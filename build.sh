@@ -133,7 +133,7 @@ XBPS_ARCH=x86_64 "${XBPS_STATIC_ROOT}/usr/bin/xbps-install" \
     --rootdir "${CONTAINER_MOUNT}" \
     --repository "${VOID_LINUX_REPOSITORY}" \
     --sync --yes \
-    ${VOID_LINUX_PACKAGES[@]}
+    "${VOID_LINUX_PACKAGES[@]}"
 
 # XXX
 buildah unmount "$CONTAINER"
@@ -141,7 +141,7 @@ buildah unmount "$CONTAINER"
 # configure entrypoint to run default runit service directory
 # XXX: mount tmpfs at /tmp while running instead?
 # buildah run "$CONTAINER" -- chmod 0777 /tmp
-buildah add --chmod 0755 --chown root:root "$CONTAINER" ./entrypoint.sh /entrypoint.sh
+buildah add --chmod 0755 --chown root:root "$CONTAINER" "${TOP}/entrypoint.sh" /entrypoint.sh
 buildah config --entrypoint '/entrypoint.sh' "$CONTAINER"
 
 # disable unnecessary system services

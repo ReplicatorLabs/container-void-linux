@@ -40,12 +40,14 @@ start_service () {
 # wait for network port in listening state
 wait_port_listen () {
     PORT="$1"
+    printf "Wait for port %s " "$PORT"
 
-    printf "Wait for port ${PORT} "
-    while [ "$(ss -H state listening sport = $PORT | wc -l)" -eq 0 ]; do
+    CHECK=$(ss -H state listening sport = "$PORT" | wc -l)
+    while [ "$CHECK" -eq 0 ]; do
         sleep 1
         printf "."
     done
+
     printf "\n"
 }
 
