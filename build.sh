@@ -19,6 +19,7 @@ VOID_LINUX_PACKAGES=(
     "ncurses"
     "coreutils"
     "libgcc"
+    "glibc-locales"
     "dash"
     "bash"
     "grep"
@@ -49,7 +50,6 @@ VOID_LINUX_PACKAGES=(
 
     # data
     # "tzdata"
-    # "glibc-locales"
 
     # documentation
     # "man-pages"
@@ -121,8 +121,8 @@ tar -xJf "${SCRATCH_FOLDER}/${XBPS_STATIC_ARCHIVE}" -C "$XBPS_STATIC_ROOT"
 # create container
 CONTAINER=$(buildah from scratch)
 
-# XXX
-# XXX: run this under "buildah unshare"
+# mount container filesystem
+# XXX: this script must be run with "buildah unshare"
 CONTAINER_MOUNT=$(buildah mount "$CONTAINER")
 
 # install XBPS package keys
@@ -135,8 +135,16 @@ XBPS_ARCH=x86_64 "${XBPS_STATIC_ROOT}/usr/bin/xbps-install" \
     --sync --yes \
     "${VOID_LINUX_PACKAGES[@]}"
 
-# XXX
+# unmount container filesystem
 buildah unmount "$CONTAINER"
+
+# detect default locale (based on runit-void package configuration)
+LOCALE=$(buildah run "$CONTAINER" -- grep 'LANG=' /etc/locale.conf | cut -d'=' -f2)
+echo "Default locale: $LOCALE"
+
+# enable and generate the default locale
+buildah run "$CONTAINER" -- sed -i -e "s/^#$LOCALE/$LOCALE/" /etc/default/libc-locales
+buildah run "$CONTAINER" -- xbps-reconfigure -f glibc-locales
 
 # configure entrypoint to run default runit service directory
 # XXX: mount tmpfs at /tmp while running instead?
