@@ -37,6 +37,7 @@ VOID_LINUX_PACKAGES=(
     "void-artwork"
     "runit-void"
     "removed-packages"
+    "util-linux"
 
     # user tools
     # "findutils"
@@ -83,7 +84,6 @@ VOID_LINUX_PACKAGES=(
     # kernel
     # "kmod",
     # "linux"
-    # "util-linux"
 )
 
 # xbps
