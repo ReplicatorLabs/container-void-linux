@@ -8,6 +8,10 @@
 # is fixed and it can cleanly quit inside containers
 # http://skarnet.org/lists/supervision/2644.html
 
+# prevent failed globs from working at all in loops
+# https://www.shellcheck.net/wiki/SC2045
+shopt -s nullglob
+
 ##
 # Services
 ##
@@ -20,38 +24,19 @@ ln -sf /etc/runit/runsvdir/current /run/runit/runsvdir/current
 # kill all child processes when any signal is received
 cleanup () {
     echo "Terminate all processes..."
-    # shellcheck disable=SC2046
-    kill -TERM $(jobs -p) 2>/dev/null || true
+    kill -TERM "$(jobs -p)" 2>/dev/null || true
 }
 
 trap 'exit' INT QUIT TERM
 trap 'cleanup' EXIT
 
-# start runit service as a child process
-start_service () {
-    NAME="$1"
-    SVDIR="/run/runit/runsvdir/current/${NAME}"
+# start all enabled services
+for SVDIR in /run/runit/runsvdir/current/*; do
+    SERVICE=$(basename "$SVDIR")
 
-    # http://smarden.org/runit/runsv.8.html
-    echo "Start service: $NAME"
+    echo "Start service: $SERVICE"
     runsv "$SVDIR" &
-}
-
-# wait for network port in listening state
-wait_port_listen () {
-    PORT="$1"
-    printf "Wait for port %s " "$PORT"
-
-    CHECK=$(ss -H state listening sport = "$PORT" | wc -l)
-    while [ "$CHECK" -eq 0 ]; do
-        sleep 1
-        printf "."
-    done
-
-    printf "\n"
-}
-
-# TODO: start services here
+done
 
 ##
 # Foreground
