@@ -9,8 +9,11 @@ TOP=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # Settings
 ##
 
-# buildah image
 IMAGE="void-linux"
+
+# XBPS
+XBPS_STATIC_MIRROR="https://repo-default.voidlinux.org/static"
+XBPS_STATIC_VERSION="latest.x86_64-musl"
 
 # Void Linux
 VOID_LINUX_REPOSITORY="https://repo-default.voidlinux.org/current"
@@ -86,10 +89,6 @@ VOID_LINUX_PACKAGES=(
     # "linux"
 )
 
-# xbps
-XBPS_STATIC_MIRROR="https://repo-default.voidlinux.org/static"
-XBPS_STATIC_VERSION="latest.x86_64-musl"
-
 ##
 # Build Steps
 ##
@@ -112,7 +111,8 @@ echo "Scratch folder: ${SCRATCH_FOLDER}"
 # download, extract, and prepare xbps tools
 XBPS_STATIC_ARCHIVE="xbps-static-${XBPS_STATIC_VERSION}.tar.xz"
 wget "${XBPS_STATIC_MIRROR}/${XBPS_STATIC_ARCHIVE}" \
-    -O "${SCRATCH_FOLDER}/${XBPS_STATIC_ARCHIVE}"
+    --output-document "${SCRATCH_FOLDER}/${XBPS_STATIC_ARCHIVE}" \
+    --no-verbose
 
 XBPS_STATIC_ROOT="${SCRATCH_FOLDER}/xbps"
 mkdir -p "$XBPS_STATIC_ROOT"
